@@ -1,578 +1,969 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-  <title>YouTube Downloader</title>
-  <meta name="description" content="Fast and simple video downloader web application.">
-  <meta name="theme-color" content="#ff0033">
+<title>VidLoad — Video Downloader</title>
 
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, Helvetica, sans-serif;
-    }
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
 
-    body {
-      min-height: 100vh;
-      background:
-        radial-gradient(circle at top left, #35111b 0%, transparent 35%),
-        radial-gradient(circle at bottom right, #151c38 0%, transparent 35%),
+body{
+    min-height:100vh;
+    background:
+        radial-gradient(circle at 10% 0%,#35111b,transparent 35%),
+        radial-gradient(circle at 90% 100%,#151d3d,transparent 35%),
         #08090d;
-      color: white;
+    color:#fff;
+}
+
+header{
+    height:70px;
+    padding:0 7%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    background:rgba(8,9,13,.8);
+    backdrop-filter:blur(15px);
+    position:sticky;
+    top:0;
+    z-index:10;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    font-size:21px;
+    font-weight:800;
+}
+
+.logo-icon{
+    width:38px;
+    height:38px;
+    border-radius:11px;
+    background:#ff0033;
+    display:grid;
+    place-items:center;
+    box-shadow:0 8px 30px rgba(255,0,51,.35);
+}
+
+nav{
+    display:flex;
+    gap:25px;
+}
+
+nav a{
+    color:#aaa;
+    text-decoration:none;
+    font-size:14px;
+}
+
+nav a:hover{
+    color:white;
+}
+
+.hero{
+    max-width:1000px;
+    margin:auto;
+    padding:85px 20px 40px;
+    text-align:center;
+}
+
+.badge{
+    display:inline-block;
+    padding:8px 15px;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.05);
+    border-radius:30px;
+    color:#ccc;
+    font-size:13px;
+    margin-bottom:22px;
+}
+
+h1{
+    font-size:clamp(43px,7vw,76px);
+    line-height:1;
+    letter-spacing:-3px;
+    margin-bottom:22px;
+}
+
+h1 span{
+    background:linear-gradient(90deg,#ff0033,#ff6680);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+}
+
+.subtitle{
+    max-width:650px;
+    margin:auto;
+    color:#999;
+    line-height:1.7;
+}
+
+.downloader{
+    max-width:850px;
+    margin:40px auto 0;
+    padding:10px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:20px;
+    box-shadow:0 25px 80px rgba(0,0,0,.35);
+}
+
+.input-area{
+    display:flex;
+    gap:10px;
+    padding:8px;
+    background:#111219;
+    border-radius:14px;
+}
+
+.input-area input{
+    flex:1;
+    min-width:0;
+    background:transparent;
+    border:none;
+    outline:none;
+    color:white;
+    padding:16px;
+    font-size:15px;
+}
+
+.input-area input::placeholder{
+    color:#666;
+}
+
+button{
+    border:0;
+    cursor:pointer;
+    font-weight:700;
+}
+
+.get-btn{
+    padding:0 25px;
+    border-radius:11px;
+    background:#ff0033;
+    color:white;
+}
+
+.get-btn:hover{
+    background:#e5002e;
+}
+
+.get-btn:disabled{
+    opacity:.5;
+    cursor:not-allowed;
+}
+
+.paste{
+    margin-top:12px;
+    color:#777;
+    font-size:13px;
+    cursor:pointer;
+}
+
+.paste:hover{
+    color:#ddd;
+}
+
+.error{
+    display:none;
+    color:#ff6c87;
+    text-align:left;
+    padding:12px 5px 0;
+    font-size:14px;
+}
+
+.loading{
+    display:none;
+    padding:25px;
+    color:#999;
+}
+
+.spinner{
+    width:30px;
+    height:30px;
+    margin:0 auto 12px;
+    border:3px solid rgba(255,255,255,.15);
+    border-top-color:#ff0033;
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+.result{
+    display:none;
+    margin-top:25px;
+    padding:18px;
+    background:#101117;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:17px;
+    text-align:left;
+}
+
+.video-info{
+    display:flex;
+    gap:18px;
+    align-items:center;
+}
+
+.thumbnail{
+    width:220px;
+    height:125px;
+    border-radius:12px;
+    overflow:hidden;
+    background:#191b22;
+    flex-shrink:0;
+    display:grid;
+    place-items:center;
+}
+
+.thumbnail img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.video-title{
+    font-size:18px;
+    font-weight:700;
+    line-height:1.4;
+    margin-bottom:8px;
+}
+
+.video-meta{
+    color:#777;
+    font-size:13px;
+}
+
+.download-row{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+}
+
+select{
+    flex:1;
+    padding:14px;
+    border-radius:10px;
+    background:#181a22;
+    border:1px solid rgba(255,255,255,.1);
+    color:white;
+    outline:none;
+}
+
+.download-btn{
+    padding:0 25px;
+    border-radius:10px;
+    background:#22c55e;
+    color:white;
+}
+
+.download-btn:hover{
+    background:#16a34a;
+}
+
+.download-btn:disabled{
+    opacity:.5;
+    cursor:not-allowed;
+}
+
+.features{
+    max-width:1050px;
+    margin:60px auto;
+    padding:0 20px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:16px;
+}
+
+.feature{
+    padding:25px;
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.035);
+    border-radius:17px;
+}
+
+.feature-icon{
+    font-size:28px;
+    margin-bottom:15px;
+}
+
+.feature h3{
+    margin-bottom:8px;
+}
+
+.feature p{
+    color:#888;
+    line-height:1.6;
+    font-size:14px;
+}
+
+footer{
+    padding:35px 20px;
+    text-align:center;
+    color:#666;
+    border-top:1px solid rgba(255,255,255,.07);
+    font-size:13px;
+}
+
+@media(max-width:700px){
+
+    nav{
+        display:none;
     }
 
-    header {
-      height: 72px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 7%;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      background: rgba(8,9,13,.75);
-      backdrop-filter: blur(15px);
-      position: sticky;
-      top: 0;
-      z-index: 10;
+    .hero{
+        padding-top:60px;
     }
 
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 21px;
-      font-weight: 800;
+    .input-area{
+        flex-direction:column;
     }
 
-    .logo-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 11px;
-      display: grid;
-      place-items: center;
-      background: #ff0033;
-      box-shadow: 0 8px 30px rgba(255,0,51,.35);
+    .get-btn{
+        padding:15px;
     }
 
-    nav {
-      display: flex;
-      gap: 25px;
+    .video-info{
+        flex-direction:column;
+        align-items:stretch;
     }
 
-    nav a {
-      color: #aaa;
-      text-decoration: none;
-      font-size: 14px;
-      transition: .2s;
+    .thumbnail{
+        width:100%;
+        height:190px;
     }
 
-    nav a:hover {
-      color: white;
+    .download-row{
+        flex-direction:column;
     }
 
-    .hero {
-      max-width: 1000px;
-      margin: auto;
-      padding: 90px 20px 40px;
-      text-align: center;
+    .download-btn{
+        padding:14px;
     }
 
-    .badge {
-      display: inline-block;
-      padding: 8px 15px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.05);
-      border-radius: 30px;
-      color: #ddd;
-      font-size: 13px;
-      margin-bottom: 22px;
+    .features{
+        grid-template-columns:1fr;
     }
-
-    h1 {
-      font-size: clamp(42px, 7vw, 76px);
-      line-height: 1;
-      letter-spacing: -3px;
-      margin-bottom: 22px;
-    }
-
-    h1 span {
-      background: linear-gradient(90deg, #ff0033, #ff5575);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .subtitle {
-      max-width: 650px;
-      margin: auto;
-      color: #999;
-      line-height: 1.7;
-      font-size: 16px;
-    }
-
-    .downloader {
-      max-width: 850px;
-      margin: 42px auto 0;
-      padding: 10px;
-      border-radius: 20px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.1);
-      box-shadow: 0 25px 80px rgba(0,0,0,.35);
-    }
-
-    .input-area {
-      display: flex;
-      gap: 10px;
-      background: #111219;
-      border-radius: 14px;
-      padding: 8px;
-    }
-
-    .input-area input {
-      flex: 1;
-      min-width: 0;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: white;
-      padding: 16px;
-      font-size: 15px;
-    }
-
-    .input-area input::placeholder {
-      color: #666;
-    }
-
-    button {
-      border: none;
-      cursor: pointer;
-      font-weight: 700;
-    }
-
-    .get-btn {
-      background: #ff0033;
-      color: white;
-      border-radius: 11px;
-      padding: 0 25px;
-      transition: .2s;
-    }
-
-    .get-btn:hover {
-      background: #e6002e;
-      transform: translateY(-1px);
-    }
-
-    .paste {
-      margin-top: 12px;
-      color: #777;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    .paste:hover {
-      color: #ddd;
-    }
-
-    .result {
-      display: none;
-      margin-top: 25px;
-      text-align: left;
-      background: #101117;
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 17px;
-      padding: 18px;
-    }
-
-    .result.show {
-      display: block;
-    }
-
-    .video-info {
-      display: flex;
-      gap: 18px;
-      align-items: center;
-    }
-
-    .thumbnail {
-      width: 220px;
-      height: 125px;
-      border-radius: 12px;
-      background: linear-gradient(135deg,#252832,#15171d);
-      display: grid;
-      place-items: center;
-      color: #777;
-      flex-shrink: 0;
-      overflow: hidden;
-    }
-
-    .thumbnail img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .video-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .video-meta {
-      color: #777;
-      font-size: 13px;
-    }
-
-    .download-row {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    select {
-      flex: 1;
-      background: #181a22;
-      color: white;
-      border: 1px solid rgba(255,255,255,.1);
-      border-radius: 10px;
-      padding: 13px;
-      outline: none;
-    }
-
-    .download-btn {
-      background: #22c55e;
-      color: white;
-      border-radius: 10px;
-      padding: 0 25px;
-    }
-
-    .download-btn:hover {
-      background: #16a34a;
-    }
-
-    .error {
-      display: none;
-      color: #ff718c;
-      margin-top: 15px;
-      font-size: 14px;
-    }
-
-    .features {
-      max-width: 1050px;
-      margin: 60px auto;
-      padding: 0 20px;
-      display: grid;
-      grid-template-columns: repeat(3,1fr);
-      gap: 16px;
-    }
-
-    .feature {
-      padding: 25px;
-      border: 1px solid rgba(255,255,255,.08);
-      background: rgba(255,255,255,.035);
-      border-radius: 17px;
-    }
-
-    .feature-icon {
-      font-size: 28px;
-      margin-bottom: 15px;
-    }
-
-    .feature h3 {
-      margin-bottom: 8px;
-    }
-
-    .feature p {
-      color: #888;
-      line-height: 1.6;
-      font-size: 14px;
-    }
-
-    footer {
-      text-align: center;
-      color: #666;
-      padding: 35px 20px;
-      border-top: 1px solid rgba(255,255,255,.07);
-      font-size: 13px;
-    }
-
-    @media(max-width:700px) {
-      nav {
-        display: none;
-      }
-
-      .hero {
-        padding-top: 60px;
-      }
-
-      .input-area {
-        flex-direction: column;
-      }
-
-      .get-btn {
-        padding: 15px;
-      }
-
-      .video-info {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .thumbnail {
-        width: 100%;
-        height: 190px;
-      }
-
-      .download-row {
-        flex-direction: column;
-      }
-
-      .download-btn {
-        padding: 14px;
-      }
-
-      .features {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+}
+</style>
 </head>
 
 <body>
 
 <header>
-  <div class="logo">
-    <div class="logo-icon">▶</div>
-    <span>VidLoad</span>
-  </div>
 
-  <nav>
-    <a href="#home">Home</a>
-    <a href="#features">Features</a>
-    <a href="#about">About</a>
-  </nav>
+    <div class="logo">
+        <div class="logo-icon">▶</div>
+        <span>VidLoad</span>
+    </div>
+
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#features">Features</a>
+        <a href="#about">About</a>
+    </nav>
+
 </header>
+
 
 <main id="home">
 
-  <section class="hero">
+<section class="hero">
 
-    <div class="badge">⚡ Fast • Simple • Easy to Use</div>
+    <div class="badge">
+        ⚡ Fast • Simple • Responsive
+    </div>
 
     <h1>
-      Download Videos<br>
-      <span>Simply.</span>
+        Download Videos<br>
+        <span>Simply.</span>
     </h1>
 
     <p class="subtitle">
-      Paste a supported video URL below to retrieve available media
-      information and download options.
+        Paste a supported video URL below to retrieve available
+        media information and download options.
     </p>
+
 
     <div class="downloader">
 
-      <div class="input-area">
+        <div class="input-area">
 
-        <input
-          id="urlInput"
-          type="text"
-          placeholder="Paste video URL here..."
-          autocomplete="off"
-        >
+            <input
+                id="urlInput"
+                type="text"
+                placeholder="Paste video URL here..."
+                autocomplete="off"
+            >
 
-        <button class="get-btn" onclick="getVideo()">
-          Get Video
-        </button>
-
-      </div>
-
-      <div class="paste" onclick="pasteURL()">
-        📋 Paste from clipboard
-      </div>
-
-      <div id="error" class="error"></div>
-
-      <div id="result" class="result">
-
-        <div class="video-info">
-
-          <div class="thumbnail">
-            <img id="thumbnail" src="" alt="Video thumbnail">
-          </div>
-
-          <div>
-            <div id="videoTitle" class="video-title">
-              Video title
-            </div>
-
-            <div id="videoMeta" class="video-meta">
-              Ready to download
-            </div>
-          </div>
+            <button
+                id="getBtn"
+                class="get-btn"
+                onclick="getVideo()"
+            >
+                Get Video
+            </button>
 
         </div>
 
-        <div class="download-row">
 
-          <select id="quality">
-            <option value="best">Best available quality</option>
-            <option value="1080p">1080p</option>
-            <option value="720p">720p</option>
-            <option value="480p">480p</option>
-            <option value="360p">360p</option>
-            <option value="audio">Audio only</option>
-          </select>
+        <div class="paste" onclick="pasteURL()">
+            📋 Paste from clipboard
+        </div>
 
-          <button
-            class="download-btn"
-            onclick="downloadVideo()"
-          >
-            ⬇ Download
-          </button>
+
+        <div id="error" class="error"></div>
+
+
+        <div id="loading" class="loading">
+
+            <div class="spinner"></div>
+
+            <div>
+                Getting video information...
+            </div>
 
         </div>
 
-      </div>
+
+        <div id="result" class="result">
+
+            <div class="video-info">
+
+                <div class="thumbnail">
+
+                    <img
+                        id="thumbnail"
+                        src=""
+                        alt="Video thumbnail"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <div
+                        id="videoTitle"
+                        class="video-title"
+                    >
+                        Video title
+                    </div>
+
+                    <div
+                        id="videoMeta"
+                        class="video-meta"
+                    >
+                        Ready
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="download-row">
+
+                <select id="quality">
+                    <option value="best">
+                        Best available quality
+                    </option>
+
+                    <option value="1080p">
+                        1080p
+                    </option>
+
+                    <option value="720p">
+                        720p
+                    </option>
+
+                    <option value="480p">
+                        480p
+                    </option>
+
+                    <option value="360p">
+                        360p
+                    </option>
+
+                    <option value="audio">
+                        Audio only
+                    </option>
+                </select>
+
+
+                <button
+                    id="downloadBtn"
+                    class="download-btn"
+                    onclick="downloadVideo()"
+                >
+                    ⬇ Download
+                </button>
+
+            </div>
+
+        </div>
 
     </div>
 
-  </section>
+</section>
 
-  <section class="features" id="features">
+
+<section
+    class="features"
+    id="features"
+>
 
     <div class="feature">
-      <div class="feature-icon">🔗</div>
-      <h3>Easy URL</h3>
-      <p>
-        Paste a supported video URL and retrieve its available
-        media information.
-      </p>
+
+        <div class="feature-icon">🔗</div>
+
+        <h3>Easy URL</h3>
+
+        <p>
+            Paste a supported URL and retrieve available
+            media information.
+        </p>
+
     </div>
+
 
     <div class="feature">
-      <div class="feature-icon">🎬</div>
-      <h3>Quality Options</h3>
-      <p>
-        Select from available video qualities or choose audio-only
-        when supported.
-      </p>
+
+        <div class="feature-icon">🎬</div>
+
+        <h3>Quality Options</h3>
+
+        <p>
+            Select from available video qualities when
+            supported by the source.
+        </p>
+
     </div>
+
 
     <div class="feature">
-      <div class="feature-icon">⚡</div>
-      <h3>Simple Interface</h3>
-      <p>
-        Clean, responsive and mobile-friendly interface designed
-        for quick use.
-      </p>
+
+        <div class="feature-icon">📱</div>
+
+        <h3>Responsive</h3>
+
+        <p>
+            Works across desktop and mobile screen sizes
+            with a clean interface.
+        </p>
+
     </div>
 
-  </section>
+</section>
 
 </main>
 
+
 <footer id="about">
-  © 2026 VidLoad — Use only with content you have permission to download.
+    © 2026 VidLoad — Use only with content you have permission to download.
 </footer>
 
 
 <script>
 
-async function pasteURL() {
+/*
+====================================================
+BACKEND URL
+====================================================
 
-  try {
+Local testing:
+http://localhost:5000
 
-    const text = await navigator.clipboard.readText();
+After deploying your Python backend:
+https://YOUR-BACKEND-DOMAIN
+*/
 
-    document.getElementById("urlInput").value = text;
-
-  } catch {
-
-    showError("Clipboard permission was not available.");
-
-  }
-
-}
+const API_URL = "http://localhost:5000";
 
 
-function showError(message) {
+const urlInput = document.getElementById("urlInput");
+const getBtn = document.getElementById("getBtn");
+const downloadBtn = document.getElementById("downloadBtn");
 
-  const error = document.getElementById("error");
+const result = document.getElementById("result");
+const loading = document.getElementById("loading");
+const errorBox = document.getElementById("error");
 
-  error.innerText = message;
-  error.style.display = "block";
-
-}
-
-
-function hideError() {
-
-  document.getElementById("error").style.display = "none";
-
-}
+const thumbnail = document.getElementById("thumbnail");
+const videoTitle = document.getElementById("videoTitle");
+const videoMeta = document.getElementById("videoMeta");
+const quality = document.getElementById("quality");
 
 
-async function getVideo() {
+let currentURL = "";
 
-  hideError();
 
-  const url = document.getElementById("urlInput").value.trim();
+function showError(message){
 
-  if (!url) {
-
-    showError("Please paste a video URL first.");
-    return;
-
-  }
-
-  /*
-    Temporary frontend demo.
-
-    Backend API will be connected here in the next part.
-  */
-
-  const result = document.getElementById("result");
-
-  result.classList.add("show");
-
-  document.getElementById("videoTitle").innerText =
-    "Video information will appear here";
-
-  document.getElementById("videoMeta").innerText =
-    "Backend connection required";
-
-  document.getElementById("thumbnail").src = "";
+    errorBox.innerText = message;
+    errorBox.style.display = "block";
 
 }
 
 
-async function downloadVideo() {
+function hideError(){
 
-  const url = document.getElementById("urlInput").value.trim();
-  const quality = document.getElementById("quality").value;
-
-  if (!url) {
-
-    showError("Please enter a video URL.");
-    return;
-
-  }
-
-  /*
-    Backend download endpoint will be connected here.
-
-    Example:
-
-    /api/download?url=...&quality=...
-  */
-
-  alert(
-    "Download API will be connected in the backend part."
-  );
+    errorBox.style.display = "none";
 
 }
+
+
+async function pasteURL(){
+
+    try{
+
+        const text =
+            await navigator.clipboard.readText();
+
+        urlInput.value = text;
+
+    }catch{
+
+        showError(
+            "Clipboard permission is not available. Paste the URL manually."
+        );
+
+    }
+
+}
+
+
+function setLoading(status){
+
+    loading.style.display =
+        status ? "block" : "none";
+
+    getBtn.disabled = status;
+
+}
+
+
+function formatDuration(seconds){
+
+    if(!seconds){
+        return "Duration unavailable";
+    }
+
+    const h = Math.floor(seconds / 3600);
+
+    const m = Math.floor(
+        (seconds % 3600) / 60
+    );
+
+    const s = Math.floor(
+        seconds % 60
+    );
+
+    if(h > 0){
+
+        return `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+
+    }
+
+    return `${m}:${String(s).padStart(2,"0")}`;
+
+}
+
+
+async function getVideo(){
+
+    hideError();
+
+    result.style.display = "none";
+
+    const url = urlInput.value.trim();
+
+    if(!url){
+
+        showError(
+            "Please paste a video URL first."
+        );
+
+        return;
+
+    }
+
+
+    currentURL = url;
+
+    setLoading(true);
+
+
+    try{
+
+        const response = await fetch(
+            `${API_URL}/api/info`,
+            {
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                body:JSON.stringify({
+                    url:url
+                })
+            }
+        );
+
+
+        const data = await response.json();
+
+
+        if(!response.ok || !data.success){
+
+            throw new Error(
+                data.error || "Unable to retrieve video information."
+            );
+
+        }
+
+
+        const video = data.data;
+
+
+        videoTitle.innerText =
+            video.title || "Untitled video";
+
+
+        videoMeta.innerText =
+            `${video.uploader || "Unknown"} • ${formatDuration(video.duration)}`;
+
+
+        if(video.thumbnail){
+
+            thumbnail.src =
+                video.thumbnail;
+
+        }else{
+
+            thumbnail.removeAttribute("src");
+
+        }
+
+
+        /*
+        Populate qualities returned by backend.
+        */
+
+        quality.innerHTML = "";
+
+
+        const bestOption =
+            document.createElement("option");
+
+        bestOption.value = "best";
+        bestOption.textContent =
+            "Best available quality";
+
+        quality.appendChild(bestOption);
+
+
+        const heights = [
+            ...new Set(
+                (video.formats || [])
+                .map(f => f.height)
+                .filter(Boolean)
+            )
+        ]
+        .sort((a,b) => b-a);
+
+
+        heights.forEach(height => {
+
+            const option =
+                document.createElement("option");
+
+            option.value =
+                `${height}p`;
+
+            option.textContent =
+                `${height}p`;
+
+            quality.appendChild(option);
+
+        });
+
+
+        const audioOption =
+            document.createElement("option");
+
+        audioOption.value = "audio";
+        audioOption.textContent =
+            "Audio only";
+
+        quality.appendChild(audioOption);
+
+
+        result.style.display = "block";
+
+    }
+    catch(error){
+
+        showError(
+            error.message ||
+            "Something went wrong."
+        );
+
+    }
+    finally{
+
+        setLoading(false);
+
+    }
+
+}
+
+
+async function downloadVideo(){
+
+    hideError();
+
+    const url = currentURL || urlInput.value.trim();
+
+    if(!url){
+
+        showError(
+            "Please enter a video URL first."
+        );
+
+        return;
+
+    }
+
+
+    const selectedQuality =
+        quality.value;
+
+
+    downloadBtn.disabled = true;
+
+    downloadBtn.innerText =
+        "Preparing...";
+
+
+    try{
+
+        const response = await fetch(
+            `${API_URL}/api/download`,
+            {
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                body:JSON.stringify({
+                    url:url,
+                    quality:selectedQuality
+                })
+            }
+        );
+
+
+        if(!response.ok){
+
+            let message =
+                "Download failed.";
+
+            try{
+
+                const data =
+                    await response.json();
+
+                message =
+                    data.error || message;
+
+            }catch{}
+
+            throw new Error(message);
+
+        }
+
+
+        const blob =
+            await response.blob();
+
+
+        const downloadURL =
+            window.URL.createObjectURL(blob);
+
+
+        const a =
+            document.createElement("a");
+
+        a.href =
+            downloadURL;
+
+        a.download =
+            "video-download";
+
+
+        document.body.appendChild(a);
+
+        a.click();
+
+        a.remove();
+
+
+        window.URL.revokeObjectURL(
+            downloadURL
+        );
+
+    }
+    catch(error){
+
+        showError(
+            error.message ||
+            "Download failed."
+        );
+
+    }
+    finally{
+
+        downloadBtn.disabled = false;
+
+        downloadBtn.innerText =
+            "⬇ Download";
+
+    }
+
+}
+
+
+urlInput.addEventListener(
+    "keydown",
+    function(event){
+
+        if(event.key === "Enter"){
+
+            getVideo();
+
+        }
+
+    }
+);
 
 </script>
 
